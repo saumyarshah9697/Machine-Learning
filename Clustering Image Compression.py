@@ -3,11 +3,12 @@ import numpy as np
 import random
 from tqdm import tqdm
 
-f1=open("Model3.txt","w")
+
 def deshape(img):
     arr=[]
     for i in img:
-        for x in i:
+        for x in np.array(i,dtype="uint8").tolist():
+            print(x)
             arr.append(x)
     return arr
 
@@ -31,48 +32,55 @@ def norm(P1,P2):
 def ClusterInit(arr,K):
     print("Generating ",K," Clusters from Arr")
     s="Generating "+str(K)+" Clusters from Arr\n"
-    f1.write(s)
+   
     a=random.sample(arr,K)
-    f1.write(str(a)+"\n")
+   
     return a
     
     
 def Compress(arr,Clusteroids,indexes):
-    f1.write("\n\n\n\\n Compressing Data")
+   
     a=[]
     for i in indexes:
         a.append(Clusteroids[i])
-        f1.write(str(a[-1])+"\n")
+       
     return a
     
 def Closest(arr,Clusteroids):
-    print("computing Closest Clusteroids")
-    f1.write("Computing Closest Clusteroids\n")
+    print("Computing Closest Clusteroids")
+   
     indexes=[]
-    count=0
+    count=1
     for i in tqdm(arr):
 #         print("for ",count+1,"element out of 64")
-        a="for "+str(count+1)+"element out of 64\n"
-        f1.write(a)
-        temp=[]
+        a="for "+str(count)+" element\n"
+       
+        temp =[]
         for j in Clusteroids:
             temp.append(norm(i,j))
         indexes.append(temp.index(min(temp)))
-        f1.write(str(i)+" "+str(indexes[-1])+"\n")
+        
         count+=1
-    return indexes    
+    print(indexes)
+    return indexes
 
 def ComputeMeans(arr,indexes,Clusteroids):
     newClus=[]
-    print(arr)
+    print(len(arr))
+    print(len(indexes))
+    print(len(Clusteroids))
     for i in range(len(Clusteroids)):
         z=[]
         for j in indexes:
-            if i==j:
+            if i == j:
                 z.append(arr[indexes.index(j)])
-        newClus.append(getmean(z))
+        print(z)
+        if len(z)==0:
+            continue
+        else:
+            newClus.append(getmean(z))
     for a in newClus:
-        f1.write(str(a)+"\n")
+        
         if str(newClus)==str(Clusteroids):
             return ("end K Means",newClus)
     return (None,newClus)
@@ -92,12 +100,11 @@ def Clusetering(arr,Clusteroids,iterations):
     for i in range(iterations):
         a=str(i)+"th Iteration\n"
         print(a)
-        f1.write(a)
+
         indexes=Closest(arr,Clusteroids)
-        f1.write("Computing means of clusteroids")
+      
         print("Computing means of clusteroids")
         a,Clusteroid=ComputeMeans(arr, indexes, Clusteroids)
-        f1.write("======================================================\n")
         if(a=="end K means"):
             i=iterations
         Clusteroids=Clusteroid
@@ -107,12 +114,15 @@ def Clusetering(arr,Clusteroids,iterations):
 
 
 
-img=cv2.resize(cv2.imread("112.jpeg"),(100,100))
+# img=cv2.resize(cv2.imread("112.jpeg"),(100,100))
+img=(cv2.imread("112.jpeg"))
 arr=deshape(img)
 
 K=100
 iterations=5
 Clusteroids=ClusterInit(arr, K)
+print(arr[0])
+print(Clusteroids)
 data=Clusetering(arr, Clusteroids, iterations)
 img2=reshape(data,img.shape[0], img.shape[1])
 cv2.imshow("Original",cv2.resize(img,(500,500)))
